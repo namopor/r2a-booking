@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>จองเวลาสัมภาษณ์ R2A · R2A Interview Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ef; --card: #fff; --ink: #1f2328; --muted: #646b73; --line: #e3e0da;
+    --accent: #1f5f4a; --accent-ink: #fff; --accent-soft: #e5efe9;
+    --danger: #a63d2f; --danger-soft: #f8e9e6; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans Thai", system-ui, sans-serif; font-size: 16px; line-height: 1.55; }
+  .wrap { max-width: 600px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+  h1 { font-size: 1.45rem; font-weight: 600; margin: 0; line-height: 1.3; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; background: var(--card); padding: 3px; flex-shrink: 0; }
+  .lang button { border: 0; background: transparent; font: inherit; font-size: .85rem; font-weight: 500; padding: 4px 12px; border-radius: 999px; color: var(--muted); cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card + .card { margin-top: 14px; }
+  .muted { color: var(--muted); }
+  label { display: block; font-weight: 500; margin: 16px 0 6px; }
+  input { width: 100%; font: inherit; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; font: inherit; font-weight: 600; padding: 12px 16px; margin-top: 16px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer; text-decoration: none; }
+  .btn[disabled] { opacity: .6; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  .link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
+  .alert { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); }
+  .hello { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .hello strong { font-size: 1.15rem; }
+  .side-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .side-head h2 { font-size: 1.05rem; margin: 0; font-weight: 600; }
+  .pill { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: .8rem; font-weight: 500; background: var(--accent-soft); color: var(--accent); }
+  .pill.grey { background: #efede9; color: var(--muted); }
+  .role { font-size: 1.1rem; font-weight: 600; margin: 10px 0 2px; }
+  .day { margin-top: 16px; }
+  .day-title { font-weight: 600; font-size: .92rem; margin-bottom: 8px; }
+  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .slot { font: inherit; font-weight: 600; padding: 10px 8px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; text-align: center; }
+  .slot:hover, .slot:focus-visible { border-color: var(--accent); outline: none; }
+  .slot small { display: block; font-weight: 400; font-size: .75rem; color: var(--muted); }
+  .detail { margin: 12px 0 0; padding: 0; list-style: none; }
+  .detail li { display: flex; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .detail li:first-child { border-top: 0; }
+  .detail .k { color: var(--muted); min-width: 88px; flex-shrink: 0; }
+  .detail a { color: var(--accent); word-break: break-all; }
+  .done-mark { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 1.4rem; margin-bottom: 8px; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  footer { margin-top: 18px; font-size: .85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="th">ไทย</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer id="footer" class="muted"></footer>
+</div>
+
+<script>
+/* ============================================================
+ * PASTE YOUR APPS SCRIPT /exec LINK HERE (Deploy > Manage deployments)
+ * ============================================================ */
+var API_URL = 'https://script.google.com/macros/s/AKfycbz0CNO9H3k915N72W-2KVS8eAlR8XHbR7TBdBtrszWUsWr0vcJh8-6ER1iQdcz7xhFW/exec';
+
+/* JSONP call to the Apps Script API (works in any browser, no Google sign-in) */
+var apiSeq = 0;
+function api(action, params, onOk, onFail, timeoutMs) {
+  var name = '__r2a_' + Date.now() + '_' + (apiSeq++);
+  var q = ['action=' + encodeURIComponent(action), 'callback=' + name, '_=' + Date.now()];
+  for (var k in (params || {})) q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k] == null ? '' : params[k]));
+  var tag = document.createElement('script');
+  var done = false;
+  var timer = setTimeout(function () { finish(); if (onFail) onFail('timeout'); }, timeoutMs || 30000);
+  function finish() {
+    if (done) return; done = true; clearTimeout(timer);
+    window[name] = function () {};            // ignore late replies
+    if (tag.parentNode) tag.parentNode.removeChild(tag);
+  }
+  window[name] = function (data) { if (done) return; finish(); onOk(data); };
+  tag.onerror = function () { if (done) return; finish(); if (onFail) onFail('network'); };
+  tag.src = API_URL + (API_URL.indexOf('?') < 0 ? '?' : '&') + q.join('&');
+  document.head.appendChild(tag);
+}
+
+var I18N = {
+  th: {
+    title: 'จองเวลาสัมภาษณ์ R2A',
+    intro: 'กรอกรหัสนักศึกษาและอีเมลที่ใช้ตอนสมัคร เพื่อจองเวลาสัมภาษณ์ออนไลน์',
+    introIdOnly: 'กรอกรหัสนักศึกษาเพื่อจองเวลาสัมภาษณ์ออนไลน์',
+    studentId: 'รหัสนักศึกษา', email: 'อีเมลที่ใช้สมัคร',
+    continue: 'เข้าสู่ระบบ', checking: 'กำลังตรวจสอบ…',
+    hello: 'สวัสดี {name}', logout: 'ออกจากระบบ',
+    back: 'งานเบื้องหลัง', front: 'งานเบื้องหน้า',
+    choice: 'อันดับที่ {n} จาก {t}',
+    pick: 'เลือกเวลาสัมภาษณ์ (ออนไลน์ 20 นาที)',
+    noSlots: 'ขณะนี้ไม่มีเวลาว่างสำหรับตำแหน่งนี้ กรุณาติดต่อทีมงาน',
+    left: 'ว่าง {n}',
+    booked: 'จองแล้ว', open: 'รอจอง', finished: 'เสร็จสิ้น', none: '—',
+    finishedText: 'ไม่มีการสัมภาษณ์ที่ต้องจองในฝั่งนี้แล้ว ทีมงานจะแจ้งผลให้ทราบ',
+    noneText: 'คุณไม่ได้เลือกตำแหน่งในฝั่งนี้',
+    confirmTitle: 'ยืนยันการจอง', confirm: 'ยืนยันการจอง', booking: 'กำลังจอง…', cancel: 'ย้อนกลับ',
+    position: 'ตำแหน่ง', date: 'วันที่', time: 'เวลา', meet: 'ลิงก์ Meet', format: 'รูปแบบ', online: 'ออนไลน์ (Google Meet)',
+    meetLater: 'ทีมงานจะแจ้งลิงก์ให้ทราบ',
+    doneTitle: 'จองเรียบร้อยแล้ว', invite: 'คำเชิญพร้อมลิงก์ Google Meet ถูกส่งไปที่อีเมลของคุณแล้ว',
+    toMine: 'กลับไปหน้าการสัมภาษณ์ของฉัน',
+    contact: 'หากมีข้อสงสัย ติดต่อ {c}',
+    err_invalid_id: 'กรุณากรอกรหัสนักศึกษาให้ถูกต้อง',
+    err_no_match: 'ไม่พบข้อมูลที่ตรงกัน กรุณาตรวจสอบรหัสนักศึกษาและอีเมลที่ใช้สมัคร',
+    err_not_open: 'สถานะของคุณเปลี่ยนไปแล้ว ข้อมูลด้านล่างอัปเดตแล้ว',
+    err_wrong_role: 'เวลานี้ไม่ใช่ของตำแหน่งที่คุณต้องสัมภาษณ์ กรุณาเลือกใหม่',
+    err_slot_taken: 'ขออภัย เวลานี้เพิ่งถูกจองไป กรุณาเลือกเวลาอื่น',
+    err_busy: 'ระบบกำลังมีผู้ใช้งานจำนวนมาก กรุณาลองอีกครั้ง',
+    err_server: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
+  },
+  en: {
+    title: 'R2A Interview Booking',
+    intro: 'Enter your student ID and the email you used in the form to book an online interview.',
+    introIdOnly: 'Enter your student ID to book an online interview.',
+    studentId: 'Student ID', email: 'Email used in the form',
+    continue: 'Log in', checking: 'Checking…',
+    hello: 'Hello, {name}', logout: 'Log out',
+    back: 'Backstage', front: 'Frontstage',
+    choice: 'Choice {n} of {t}',
+    pick: 'Choose a time (20-min online interview)',
+    noSlots: 'There are no open times for this role right now. Please contact the team.',
+    left: '{n} left',
+    booked: 'Booked', open: 'To book', finished: 'Done', none: '—',
+    finishedText: 'Nothing more to book on this side. The team will announce results.',
+    noneText: "You didn't choose any roles on this side.",
+    confirmTitle: 'Confirm your booking', confirm: 'Confirm booking', booking: 'Booking…', cancel: 'Back',
+    position: 'Role', date: 'Date', time: 'Time', meet: 'Meet link', format: 'Format', online: 'Online (Google Meet)',
+    meetLater: 'The team will send you the link.',
+    doneTitle: "You're booked", invite: 'A calendar invitation with the Google Meet link has been sent to your email.',
+    toMine: 'Back to my interviews',
+    contact: 'Questions? Contact {c}',
+    err_invalid_id: 'Please enter a valid student ID.',
+    err_no_match: "We couldn't find a match. Check your student ID and the email you applied with.",
+    err_not_open: 'Your status has changed. The page has been updated.',
+    err_wrong_role: "That time isn't for the role you're interviewing for. Please choose again.",
+    err_slot_taken: 'Sorry, that time was just taken. Please choose another.',
+    err_busy: 'The system is busy. Please try again.',
+    err_server: 'Something went wrong. Please try again.'
+  }
+};
+
+var state = { lang: 'th', view: 'login', id: '', email: '', name: '', sides: [], pick: null, last: null, error: '', loading: false };
+var config = { titleTh: '', titleEn: '', contact: '', requireEmail: true, sendInvites: false };
+try { var saved = localStorage.getItem('r2a_lang'); if (saved === 'th' || saved === 'en') state.lang = saved; } catch (e) {}
+
+function t(k, v) { var s = I18N[state.lang][k] || k; for (var x in (v || {})) s = s.replace('{' + x + '}', v[x]); return s; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function errText(code) { var k = 'err_' + code; return I18N[state.lang][k] ? t(k) : t('err_server'); }
+function fmtDate(ms) { return new Intl.DateTimeFormat(state.lang === 'th' ? 'th-TH' : 'en-GB', { timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(ms)); }
+function fmtTime(ms) { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ms)); }
+function dayKey(ms) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date(ms)); }
+function spin(l) { return '<span class="spinner" aria-hidden="true"></span>' + esc(l); }
+function errorBlock() { return state.error ? '<div class="alert" role="alert">' + esc(errText(state.error)) + '</div>' : ''; }
+function sideOf(k) { for (var i = 0; i < state.sides.length; i++) if (state.sides[i].side === k) return state.sides[i]; return null; }
+
+function details(b, side, noMeet) {
+  var rows = [
+    [t('position'), t(side) + ' – ' + b.role],
+    [t('date'), fmtDate(b.start)],
+    [t('time'), fmtTime(b.start) + ' – ' + fmtTime(b.end)],
+    [t('format'), t('online')]
+  ];
+  var meet = /^https:\/\//.test(b.meet || '') ? '<a href="' + esc(b.meet) + '" target="_blank" rel="noopener">' + esc(b.meet) + '</a>' : esc(t('meetLater'));
+  var html = rows.map(function (r) { return '<li><span class="k">' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></li>'; }).join('');
+  if (!noMeet) html += '<li><span class="k">' + esc(t('meet')) + '</span><span>' + meet + '</span></li>';
+  return '<ul class="detail">' + html + '</ul>';
+}
+
+function sideCard(s) {
+  var pillCls = s.state === 'open' ? '' : ' grey';
+  var label = s.state === 'booked' ? t('booked') : s.state === 'open' ? t('open') : s.state === 'finished' ? t('finished') : t('none');
+  var html = '<section class="card"><div class="side-head"><h2>' + esc(t(s.side)) + '</h2><span class="pill' + pillCls + '">' + esc(label) + '</span></div>';
+  if (s.state === 'none') return html + '<p class="muted" style="margin-bottom:0">' + esc(t('noneText')) + '</p></section>';
+  if (s.state === 'finished') return html + '<p class="muted" style="margin-bottom:0">' + esc(t('finishedText')) + '</p></section>';
+  html += '<div class="role">' + esc(s.role) + '</div><div class="muted" style="font-size:.88rem">' + esc(t('choice', { n: s.rank, t: s.total })) + '</div>';
+  if (s.state === 'booked') return html + details(s.booking, s.side) + '</section>';
+
+  var slots = s.slots || [];
+  html += '<div class="muted" style="margin-top:14px;font-weight:500;color:var(--ink)">' + esc(t('pick')) + '</div>';
+  if (!slots.length) return html + '<p class="muted">' + esc(t('noSlots')) + '</p></section>';
+  var groups = [], seen = {};
+  slots.forEach(function (x) { var k = dayKey(x.start); if (!seen[k]) { seen[k] = { first: x.start, items: [] }; groups.push(seen[k]); } seen[k].items.push(x); });
+  groups.forEach(function (g) {
+    html += '<div class="day"><div class="day-title">' + esc(fmtDate(g.first)) + '</div><div class="slots">';
+    g.items.forEach(function (x) {
+      html += '<button type="button" class="slot" data-side="' + esc(s.side) + '" data-id="' + esc(x.id) + '">' + fmtTime(x.start) +
+        (x.capacity > 1 ? '<small>' + esc(t('left', { n: x.left })) + '</small>' : '') + '</button>';
+    });
+    html += '</div></div>';
+  });
+  return html + '</section>';
+}
+
+function render() {
+  document.documentElement.lang = state.lang;
+  var title = (state.lang === 'th' ? config.titleTh : config.titleEn) || t('title');
+  document.getElementById('title').textContent = title;
+  document.title = title;
+  document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === state.lang)); });
+  document.getElementById('footer').textContent = config.contact ? t('contact', { c: config.contact }) : '';
+  var app = document.getElementById('app'), html = '';
+
+  if (state.view === 'login') {
+    html = '<div class="card"><p class="muted" style="margin:0">' + esc(t(config.requireEmail ? 'intro' : 'introIdOnly')) + '</p>' +
+      '<form id="loginForm" novalidate>' +
+      '<label for="sid">' + esc(t('studentId')) + '</label>' +
+      '<input id="sid" inputmode="numeric" autocomplete="off" placeholder="69056xx" value="' + esc(state.id) + '">' +
+      (config.requireEmail ? '<label for="email">' + esc(t('email')) + '</label><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name.xxx@student.mahidol.ac.th" value="' + esc(state.email) + '">' : '') +
+      errorBlock() +
+      '<button class="btn" type="submit"' + (state.loading ? ' disabled' : '') + '>' + (state.loading ? spin(t('checking')) : esc(t('continue'))) + '</button></form></div>';
+  }
+
+  if (state.view === 'home') {
+    html = '<div class="hello"><strong>' + esc(t('hello', { name: state.name })) + '</strong><button type="button" class="link" data-action="logout">' + esc(t('logout')) + '</button></div>' +
+      (state.error ? errorBlock().replace('class="alert"', 'class="alert" style="margin:0 0 14px"') : '') +
+      state.sides.map(sideCard).join('');
+  }
+
+  if (state.view === 'confirm') {
+    var p = state.pick, s = sideOf(p.side);
+    html = '<div class="card"><h2 style="margin:0;font-size:1.1rem">' + esc(t('confirmTitle')) + '</h2>' +
+      details({ role: s.role, start: p.start, end: p.end }, p.side, true) +
+      errorBlock() +
+      '<button class="btn" type="button" data-action="book"' + (state.loading ? ' disabled' : '') + '>' + (state.loading ? spin(t('booking')) : esc(t('confirm'))) + '</button>' +
+      '<button class="btn ghost" type="button" data-action="home"' + (state.loading ? ' disabled' : '') + '>' + esc(t('cancel')) + '</button></div>';
+  }
+
+  if (state.view === 'done') {
+    html = '<div class="card"><div class="done-mark" aria-hidden="true">✓</div><h2 style="margin:0;font-size:1.15rem">' + esc(t('doneTitle')) + '</h2>' +
+      details(state.last.booking, state.last.side) +
+      (config.sendInvites ? '<p class="muted" style="margin-bottom:0">' + esc(t('invite')) + '</p>' : '') +
+      '<button class="btn ghost" type="button" data-action="refresh">' + esc(t('toMine')) + '</button></div>';
+  }
+
+  app.innerHTML = html;
+  if (state.view === 'login' && !state.loading) { var f = document.getElementById(state.id ? (config.requireEmail ? 'email' : 'sid') : 'sid'); if (f) f.focus(); }
+}
+
+function fail(err) { state.loading = false; state.error = 'server'; render(); if (window.console) console.error(err); }
+
+function login() {
+  state.loading = true; state.error = ''; render();
+  api('lookup', { id: state.id, email: state.email }, function (res) {
+    state.loading = false;
+    if (!res.ok) { state.error = res.code; state.view = 'login'; render(); return; }
+    state.name = res.name; state.sides = res.sides; state.view = 'home'; render();
+  }, fail, 40000);
+}
+
+function book() {
+  state.loading = true; state.error = ''; render();
+  api('book', { id: state.id, email: state.email, side: state.pick.side, slot: state.pick.id }, function (res) {
+    state.loading = false;
+    if (res.ok) { state.last = res; state.view = 'done'; render(); return; }
+    state.error = res.code;
+    if (res.sides) { state.sides = res.sides; state.view = 'home'; }
+    render();
+  }, function () {
+    // The booking may still have gone through: reload the candidate's status.
+    state.loading = false; state.error = 'server'; login();
+  }, 60000);
+}
+
+document.addEventListener('submit', function (e) {
+  if (e.target.id !== 'loginForm') return;
+  e.preventDefault();
+  state.id = document.getElementById('sid').value.trim();
+  var em = document.getElementById('email');
+  state.email = em ? em.value.trim() : '';
+  login();
+});
+
+document.addEventListener('click', function (e) {
+  var lb = e.target.closest('.lang button');
+  if (lb) { state.lang = lb.getAttribute('data-lang'); try { localStorage.setItem('r2a_lang', state.lang); } catch (x) {} render(); return; }
+  var sb = e.target.closest('.slot');
+  if (sb) {
+    var s = sideOf(sb.getAttribute('data-side')), id = sb.getAttribute('data-id');
+    var slot = (s.slots || []).filter(function (x) { return x.id === id; })[0];
+    if (!slot) return;
+    state.pick = { side: s.side, id: id, start: slot.start, end: slot.end };
+    state.error = ''; state.view = 'confirm'; render(); window.scrollTo(0, 0); return;
+  }
+  var a = e.target.closest('[data-action]');
+  if (!a) return;
+  var act = a.getAttribute('data-action');
+  if (act === 'book') book();
+  if (act === 'home') { state.error = ''; state.view = 'home'; render(); }
+  if (act === 'refresh') { state.error = ''; login(); }
+  if (act === 'logout') { state = { lang: state.lang, view: 'login', id: '', email: '', name: '', sides: [], pick: null, last: null, error: '', loading: false }; render(); }
+});
+
+render();
+api('config', {}, function (c) { if (c && !c.code) { config = c; render(); } });
+</script>
+</body>
+</html>
